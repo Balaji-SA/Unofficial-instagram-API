@@ -1,4 +1,3 @@
-
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
@@ -7,7 +6,7 @@ import re
 import json
 from pyfiglet import Figlet
 
-def main():
+def setup():
     custom_fig = Figlet(font='cyberlarge')
     print(custom_fig.renderText('-------TASC-------'))
     chrome_options = Options()
@@ -19,6 +18,9 @@ def main():
     content = driver.page_source
     driver.close()
     soup = BeautifulSoup(content, features="lxml")
+    return soup
+def user_page():
+    soup=setup()
     try:
         data = json.loads(soup.find('script', type='application/ld+json').text)
     except:
@@ -28,10 +30,13 @@ def main():
     posts = []
     for link in soup.findAll('a', attrs={'href': re.compile("^/p/.*")}):
         posts.append(link.get('href'))
+    return posts
+def fetch_post_data():
+    posts=[]
     places = []
     Active_dates = []
     captions = []
-    # print(len(posts))
+    posts=user_page()
     for i in range(len(posts)):
         epost = urllib.request.urlopen("https://instagram.com" + posts[i])
         soup = BeautifulSoup(epost, features="lxml")
@@ -76,7 +81,10 @@ def main():
         print("\n")
         print(
             "______________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________")
-    # print("Places visited: ",places)
+    return places
+def analyze_data():
+    places=[]
+    places=fetch_post_data()
     freqcount = []
     for i in places:
         freqcount.append(places.count(i))
@@ -93,5 +101,8 @@ def main():
     print("Rarely visited places: ", set(rare_visited))
     # print("Active Dates: ", Active_dates)
     # print("captions: ",captions)
+def main():
+    analyze_data()
 
 main()
+
